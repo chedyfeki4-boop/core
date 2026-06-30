@@ -36,9 +36,28 @@ protected:
     auto* ctx = &getContext();
 
     // TODO: Task 4 (Bonus)
-  }
+    op->walk([&](scf::ForOp forOp) {
+      auto lb = getConstantIntValue(forOp.getLowerBound());
+      auto ub = getConstantIntValue(forOp.getUpperBound());
+      auto step = getConstantIntValue(forOp.getStep());
+      if (!lb || !ub || !step) {
+        return;
+      }
+      if ((*ub - *lb) / *step != 3) {
+        return;
+      }
+      (void)loopUnrollByFactor(forOp, 3);
+    });
+
+    RewritePatternSet patterns(ctx);
+    TripleOp::getCanonicalizationPatterns(patterns, ctx);
+
+    if (failed(applyPatternsGreedily(op, std::move(patterns)))) {
+      signalPassFailure();
+    } // namespace
+
+  } // namespace mlir::qco
 };
 
 } // namespace
-
 } // namespace mlir::qco

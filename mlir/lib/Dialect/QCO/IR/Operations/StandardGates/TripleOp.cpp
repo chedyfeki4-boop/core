@@ -26,7 +26,18 @@ struct RemoveThreeBackToBackTripleOps final : OpRewritePattern<TripleOp> {
   LogicalResult matchAndRewrite(TripleOp op,
                                 PatternRewriter& rewriter) const override {
     // TODO: Task 3
-    llvm::reportFatalInternalError("Not implemented yet");
+    auto second = op.getQubitIn().getDefiningOp<TripleOp>();
+    if (!second) {
+      return failure();
+    }
+
+    auto first = second.getQubitIn().getDefiningOp<TripleOp>();
+    if (!first) {
+      return failure();
+    }
+
+    rewriter.replaceOp(op, first.getQubitIn());
+    return success();
   }
 };
 

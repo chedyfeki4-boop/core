@@ -510,20 +510,38 @@ DEFINE_ONE_TARGET_ZERO_PARAMETER(SXdgOp, sxdg)
 #undef DEFINE_ONE_TARGET_ZERO_PARAMETER
 
 Value QCOProgramBuilder::triple(Value qubit) {
-  // TODO: Task 1.2b
-  llvm::reportFatalInternalError("Not implemented yet");
+  checkFinalized();
+
+  auto tripleOp = TripleOp::create(*this, qubit);
+  auto qubitOut = tripleOp.getQubitOut();
+
+  updateQubitTracking(qubit, qubitOut);
+
+  return qubitOut;
 }
 
 std::pair<Value, Value> QCOProgramBuilder::ctriple(Value control,
                                                    Value target) {
-  // TODO: Task 1.2b
-  llvm::reportFatalInternalError("Not implemented yet");
+  checkFinalized();
+
+  const auto [controlsOut, targetsOut] =
+      ctrl(control, target, [&](ValueRange targets) -> SmallVector<Value> {
+        return {triple(targets[0])};
+      });
+
+  return {controlsOut[0], targetsOut[0]};
 }
 
 std::pair<ValueRange, Value> QCOProgramBuilder::mctriple(ValueRange controls,
                                                          Value target) {
-  // TODO: Task 1.2b
-  llvm::reportFatalInternalError("Not implemented yet");
+  checkFinalized();
+
+  const auto [controlsOut, targetsOut] =
+      ctrl(controls, target, [&](ValueRange targets) -> SmallVector<Value> {
+        return {triple(targets[0])};
+      });
+
+  return {controlsOut, targetsOut[0]};
 }
 
 // OneTargetOneParameter
